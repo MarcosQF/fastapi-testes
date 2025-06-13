@@ -14,8 +14,8 @@ router = APIRouter(prefix='/users', tags=['Users'])
 
 
 @router.get('/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
-def read_user(user_id: int, session: T_Session):
-    user = session.scalar(select(User).where(User.id == user_id))
+async def read_user(user_id: int, session: T_Session):
+    user = await session.scalar(select(User).where(User.id == user_id))
 
     if not user:
         raise HTTPException(
@@ -26,11 +26,11 @@ def read_user(user_id: int, session: T_Session):
 
 
 @router.get('/', status_code=HTTPStatus.OK, response_model=UserList)
-def list_users(
+async def list_users(
     session: T_Session,
     filter_users: T_FilterUsers,
 ):
-    users = session.scalars(
+    users = await session.scalars(
         select(User).limit(filter_users.limit).offset(filter_users.offset)
     )
 
@@ -38,8 +38,8 @@ def list_users(
 
 
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
-def create_user(user: UserSchema, session: T_Session):
-    db_user = session.scalar(
+async def create_user(user: UserSchema, session: T_Session):
+    db_user = await session.scalar(
         select(User).where(
             (User.username == user.username) | (User.email == user.email)
         )
@@ -63,14 +63,14 @@ def create_user(user: UserSchema, session: T_Session):
     )
 
     session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
+    await session.commit()
+    await session.refresh(db_user)
 
     return db_user
 
 
 @router.put('/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
-def update_user(
+async def update_user(
     user_id: int,
     user: UserSchema,
     session: T_Session,
@@ -87,10 +87,11 @@ def update_user(
         current_user.email = user.email
 
         session.add(current_user)
-        session.commit()
-        session.refresh(current_user)
+        await session.commit()
+        await session.refresh(current_user)
 
         return current_user
+
     except IntegrityError:
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT,
@@ -99,7 +100,7 @@ def update_user(
 
 
 @router.delete('/{user_id}', status_code=HTTPStatus.OK, response_model=Message)
-def delete_user(
+async def delete_user(
     user_id: int,
     session: T_Session,
     current_user: T_CurrentUser,
@@ -109,7 +110,7 @@ def delete_user(
             status_code=HTTPStatus.FORBIDDEN, detail='Not enough permissions'
         )
 
-    session.delete(current_user)
-    session.commit()
+    await session.delete(current_user)
+    await session.commit()
 
     return {'message': 'User deleted'}
