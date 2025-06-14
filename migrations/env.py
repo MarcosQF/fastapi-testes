@@ -8,7 +8,7 @@ from fastapi_testes.models.common_dependencies import base
 from alembic import context
 
 from fastapi_testes.models.user_model import User
-
+from fastapi_testes.models.todo_model import Todo
 
 
 # this is the Alembic Config object, which provides

@@ -1,16 +1,23 @@
 from http import HTTPStatus
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from fastapi_testes.dependences import T_CurrentUser, T_FilterUsers, T_Session
-from fastapi_testes.security import get_password_hash
+from fastapi_testes.database import get_session
+from fastapi_testes.schemas.filters import FilterPage
+from fastapi_testes.security import get_current_user, get_password_hash
 
 from ..models.user_model import User
 from ..schemas.user_schema import Message, UserList, UserPublic, UserSchema
 
 router = APIRouter(prefix='/users', tags=['Users'])
+
+
+T_Session = Annotated[AsyncSession, Depends(get_session)]
+T_CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 @router.get('/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
@@ -28,7 +35,7 @@ async def read_user(user_id: int, session: T_Session):
 @router.get('/', status_code=HTTPStatus.OK, response_model=UserList)
 async def list_users(
     session: T_Session,
-    filter_users: T_FilterUsers,
+    filter_users: Annotated[FilterPage, Query()],
 ):
     users = await session.scalars(
         select(User).limit(filter_users.limit).offset(filter_users.offset)

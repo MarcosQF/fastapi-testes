@@ -10,3 +10,6 @@ class Settings(BaseSettings):
     ACESS_TOKEN_EXPIRE_MINUTES: int
     ALGORITHM: str
     SECRET_KEY: str
+
+
+settings = Settings()

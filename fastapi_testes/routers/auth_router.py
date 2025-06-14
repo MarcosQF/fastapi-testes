@@ -1,15 +1,20 @@
 from http import HTTPStatus
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from fastapi_testes.dependences import T_OAuth2Form, T_Session
+from fastapi_testes.database import get_session
 from fastapi_testes.models.user_model import User
 from fastapi_testes.security import create_access_token, verify_password
 
 from ..schemas.auth_schema import Token
 
 router = APIRouter(prefix='/auth', tags=['auth'])
+T_OAuth2Form = Annotated[OAuth2PasswordRequestForm, Depends()]
+T_Session = Annotated[AsyncSession, Depends(get_session)]
 
 
 @router.post('/token', response_model=Token)
