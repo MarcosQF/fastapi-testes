@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .common_dependencies import base
 from .todo_model import Todo
 
+
 @base.mapped_as_dataclass
 class User:
     __tablename__ = 'users'

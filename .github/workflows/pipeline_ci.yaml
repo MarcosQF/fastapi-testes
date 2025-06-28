@@ -1,0 +1,30 @@
+name: pipeline/CI
+on: [push, pull_request]
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Installing poetry
+        run: pipx install poetry
+
+      - name: Installing dependencies
+        run: poetry install
+
+      - name: Testing linter
+        run: poetry run task lint
+
+    env:
+      DATABASE_URL: ${{secrets.DATABASE_URL}}
+      ACESS_TOKEN_EXPIRE_MINUTES: ${{secrets.ACESS_TOKEN_EXPIRE_MINUTES}}
+      ALGORITHM: ${{secrets.ALGORITHM}}
+      SECRET_KEY: ${{secrets.SECRET_KEY}}`
